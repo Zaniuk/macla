@@ -1,6 +1,7 @@
 import Router, { json } from "express";
 import path from "path";
 import { dataApi } from "../services/api.js";
+import PersonService from "../services/PersonService.mjs";
 // import { findData } from "../services/services.js";
 import { postPersons } from "../services/services.js";
 import deletePerson from "../utils/deletePerson.mjs";
@@ -8,6 +9,11 @@ import { getLimit, getFind } from "../utils/getPerson.mjs";
 // import updatePerson from "../utils/updatePerson.js";
 let personsData = dataApi;
 const routes = Router();
+
+// Service
+
+const service = new PersonService(personsData);
+
 
 export const findData = (filtrer) => {
   const data = personsData.find((d) => d.ID === filtrer);
@@ -22,6 +28,7 @@ const idGenerator = () => {
 };
 
 //  --GET--  //
+
 
 routes.get("/", (req, res) => {
   res.send(`
@@ -39,10 +46,12 @@ routes.get("/api", (req, res) => {
   }
 });
 
-routes.get("/api/id=:id", (req, res) => {
+routes.get("/api/id=:id", async (req, res) => {
   try {
-    const post = findData(+req.params.id);
-    return post !== null ? res.send(post) : res.sendStatus(404);
+    const { id } = req.params;
+    const post = await service.get(id);
+    console.log(post)
+    res.send(post)
   } catch (error) {
     res.send(error.message);
   }
